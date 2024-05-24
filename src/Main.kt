@@ -1,15 +1,12 @@
-import java.util.Scanner
+import java.io.File
 
 fun main() {
-    val scanner = Scanner(System.`in`)
-    val sourceCode = StringBuilder()
-    while (true) {
-        val line = scanner.nextLine()
-        if (line.isEmpty()) break
-        sourceCode.appendLine(line)
-    }
+    val currentDir = System.getProperty("user.dir")
+    val fileName = "$currentDir/main.uzlang"
 
-    val lexer = Lexer(sourceCode.toString())
+    val sourceCode = File(fileName).readText()
+
+    val lexer = Lexer(sourceCode)
     val tokens = mutableListOf<Token>()
     var token = lexer.getNextToken()
     while (token.type != TokenType.EOF) {

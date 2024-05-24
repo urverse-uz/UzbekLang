@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 class Parser(private val tokens: List<Token>) {
     private var position: Int = 0
 
