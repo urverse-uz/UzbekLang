@@ -1,0 +1,3 @@
+ozgaruvchi x -> 5;
+ozgaruvchi y -> 10;
+chiqar x + y;
