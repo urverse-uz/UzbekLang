@@ -1,0 +1,3 @@
+enum class TokenType {
+    KEYWORD, IDENTIFIER, NUMBER, SYMBOL, EOF, COMMENT
+}
