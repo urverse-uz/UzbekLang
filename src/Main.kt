@@ -1,3 +1,8 @@
+import interpreter.Interpreter
+import lexer.Lexer
+import lexer.Token
+import lexer.TokenType
+import parser.Parser
 import java.io.File
 
 fun main() {

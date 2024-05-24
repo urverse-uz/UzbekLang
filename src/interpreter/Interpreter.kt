@@ -1,3 +1,8 @@
+package interpreter
+
+import ast.*
+import ast.Number
+
 class Interpreter(private val program: Program) {
     private val variables = mutableMapOf<String, Int>()
 
@@ -17,6 +22,8 @@ class Interpreter(private val program: Program) {
                 val value = evaluate(statement.expression)
                 println(value)
             }
+
+            is IfStatement -> TODO()
         }
     }
 
@@ -35,6 +42,8 @@ class Interpreter(private val program: Program) {
                     else -> throw IllegalArgumentException("Unknown operator: ${expression.operator}")
                 }
             }
+
+            is Number -> TODO()
         }
     }
 }

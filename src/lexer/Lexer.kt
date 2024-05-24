@@ -1,3 +1,4 @@
+package lexer
 
 class Lexer(private val input: String) {
     private var position: Int = 0

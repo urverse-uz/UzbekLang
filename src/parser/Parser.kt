@@ -1,3 +1,10 @@
+package parser
+
+import ast.Variable
+import ast.*
+import lexer.Token
+import lexer.TokenType
+
 class Parser(private val tokens: List<Token>) {
     private var position: Int = 0
 
