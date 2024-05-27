@@ -20,24 +20,13 @@ class Interpreter(private val program: Program) {
     private fun executeStatement(statement: Statement) {
         when (statement) {
             is VariableDeclaration -> {
-                val value = evaluateExpression(statement.value)
-                when (value) {
-                    is Int -> variables[statement.name] = value
-                    is String -> variables[statement.name] = value
-                    else -> throw IllegalArgumentException("Unsupported variable type: $value")
-                }
+                variables[statement.name] = evaluateExpression(statement.value)
             }
 
 
             is PrintStatement -> {
                 val value = evaluateExpression(statement.expression)
-                if (statement.expression is StringLiteral) {
-                    // If it's a string literal, print it without appending 0
-                    println(value)
-                } else {
-                    // For other expressions, print the value
-                    println(value)
-                }
+                println(value)
             }
 
             is IfStatement -> {
@@ -72,7 +61,6 @@ class Interpreter(private val program: Program) {
                 returnValue = evaluateExpression(statement.expression) as Int
             }
 
-            else -> throw IllegalArgumentException("Unknown statement type: $statement")
         }
     }
 
@@ -88,8 +76,20 @@ class Interpreter(private val program: Program) {
     private fun evaluateExpression(expression: Expression): Any {
         return when (expression) {
             is Number -> expression.value
-            is Variable -> variables[expression.name]
-                ?: throw IllegalArgumentException("Unknown variable: ${expression.name}")
+            is Variable -> {
+                when (val variableName = expression.name) {
+                    "t" -> true
+                    "nt" -> false
+                    else -> {
+                        when (val variableValue = variables[variableName]) {
+                            is Int -> variableValue
+                            is String -> variableValue
+                            is Boolean -> variableValue
+                            else -> throw IllegalArgumentException("Unsupported variable type: $variableValue")
+                        }
+                    }
+                }
+            }
 
             is BinaryOperation -> {
                 val left = evaluateExpression(expression.left)
@@ -99,6 +99,8 @@ class Interpreter(private val program: Program) {
                     "-" -> (left as Int) - (right as Int)
                     "*" -> (left as Int) * (right as Int)
                     "/" -> (left as Int) / (right as Int)
+                    "==" -> left == right
+                    "!=" -> left != right
                     else -> throw IllegalArgumentException("Unknown operator: ${expression.operator}")
                 }
             }
@@ -112,12 +114,12 @@ class Interpreter(private val program: Program) {
 
             is ListExpression -> expression.elements.size
 
-            is StringLiteral -> expression.value // Return the string value as-is
+            is StringLiteral -> expression.value
+            is BooleanLiteral -> expression.value
 
             else -> throw IllegalArgumentException("Unknown expression type: $expression")
         }
     }
-
 
 
 }

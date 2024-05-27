@@ -9,3 +9,10 @@ f qoshish(a | b) {
 
 ozgaruvchi son -> qoshish(x | y);
 chiqar son;
+
+ozgaruvchi mantiq1 -> t;
+ozgaruvchi mantiq2 -> nt;
+
+chiqar mantiq1;
+chiqar mantiq2;
+

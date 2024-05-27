@@ -21,5 +21,6 @@ data class BinaryOperation(val left: Expression, val operator: String, val right
 data class FunctionCall(val functionName: String, val arguments: List<Expression>) : Expression()
 data class ListExpression(val elements: List<Expression>) : Expression()
 data class StringLiteral(val value: String) : Expression()
+data class BooleanLiteral(val value: Boolean) : Expression()
 
 data class Program(val statements: List<Statement>)
