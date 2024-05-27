@@ -19,12 +19,12 @@ fun main() {
         token = lexer.getNextToken()
     }
 
-    println("Tokens: $tokens") // Debug print
+    println("Tokens: $tokens") // Debug
 
     val parser = Parser(tokens)
     val program = parser.parse()
 
-    println("Parsed program: $program") // Debug print
+    println("Parsed program: $program") // Debug
 
     val interpreter = Interpreter(program)
     interpreter.interpret()

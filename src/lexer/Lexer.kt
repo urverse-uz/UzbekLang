@@ -18,11 +18,9 @@ class Lexer(private val input: String) {
             val currentChar = input[position]
 
             if (currentChar == '#' && input.getOrNull(position + 1) == '#') {
-                // Single-line comment, ignore characters until the end of the line
                 while (position < input.length && input[position] != '\n') {
                     position++
                 }
-                // Skip newline character if present
                 if (position < input.length && input[position] == '\n') {
                     position++
                 }
@@ -51,11 +49,9 @@ class Lexer(private val input: String) {
 
             if (currentChar == '"') {
                 val stringLiteral = extractStringLiteral()
-                return Token(TokenType.STRING, stringLiteral) // Return STRING token type
+                return Token(TokenType.STRING, stringLiteral)
             }
 
-
-            // Handle symbols
             val symbol = when (currentChar) {
 
                 '(' -> {
@@ -177,7 +173,7 @@ class Lexer(private val input: String) {
     }
 
     private fun extractStringLiteral(): String {
-        val start = position + 1 // Skip the opening quotation mark
+        val start = position + 1
         var end = start
         while (end < input.length && input[end] != '"') {
             end++

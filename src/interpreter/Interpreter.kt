@@ -9,7 +9,6 @@ class Interpreter(private val program: Program) {
     private var returnValue: Int? = null
 
     init {
-        // Define built-in functions here if necessary
         functions["qoshish"] = { args -> args[0] + args[1] }
     }
 
@@ -22,7 +21,6 @@ class Interpreter(private val program: Program) {
             is VariableDeclaration -> {
                 variables[statement.name] = evaluateExpression(statement.value)
             }
-
 
             is PrintStatement -> {
                 val value = evaluateExpression(statement.expression)
@@ -38,22 +36,17 @@ class Interpreter(private val program: Program) {
                 }
             }
 
-
             is FunctionDefinition -> {
                 functions[statement.name] = { args ->
-                    // Create a new scope for function execution
                     val previousVariables = variables.toMap()
                     statement.parameters.forEachIndexed { index, param ->
                         variables[param] = args[index]
                     }
                     executeBlock(statement.body)
-                    // Capture the return value
                     val result = returnValue ?: 0
                     returnValue = null
-                    // Restore previous variable scope
                     variables.clear()
                     variables.putAll(previousVariables)
-                    // Return value (if any)
                     result
                 }
             }
