@@ -1,21 +1,32 @@
+## comment
+
+## Raqamli ozgaruvchi elon qilish
 ozgaruvchi x -> 10;
 ozgaruvchi y -> 20;
+
+## Matnli ozgaruvchi elon qilish
 ozgaruvchi matn -> "Hello";
+
+## Ekranga chiqarish
 chiqar matn;
 
+## funktsiya
 f ayirish(a | b) {
     qaytar a - b;
 }
 
+## Funktsiyani ishga tushirish
 ozgaruvchi son -> ayirish(x | y);
 chiqar son;
 
+## Mantiqli ifodalarni e'lon qilish (t - togri) (nt - notogri)
 ozgaruvchi mantiq1 -> t;
 ozgaruvchi mantiq2 -> nt;
 
 chiqar mantiq1;
 chiqar mantiq2;
 
+## Agar / Aks holda shartli ifodasi
 agar (x == y) {
     chiqar mantiq1;
 } yoki {
