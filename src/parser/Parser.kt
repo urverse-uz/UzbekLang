@@ -29,6 +29,7 @@ class Parser(private val tokens: List<Token>) {
             "ozgaruvchi" -> parseVariableDeclaration()
             "chiqar" -> parsePrintStatement()
             "agar" -> parseIfStatement()
+            "yoki" -> parseIfStatement()
             "f" -> parseFunctionDefinition()
             "qaytar" -> parseReturnStatement()
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
@@ -139,7 +140,7 @@ class Parser(private val tokens: List<Token>) {
 
     private fun parseBinaryOperation(): Expression {
         var left = parsePrimary()
-        while (currentToken().value in listOf("+", "-", "*", "/", ">", "<", "==")) {
+        while (currentToken().value in listOf("+", "-", "*", "/", ">", "<", "==", "!=")) {
             val operator = currentToken().value
             advance() // consume operator
             val right = parsePrimary()
@@ -155,6 +156,7 @@ class Parser(private val tokens: List<Token>) {
                 advance() // consume number
                 Number(value)
             }
+
             TokenType.IDENTIFIER -> {
                 val name = currentToken().value
                 advance() // consume identifier
@@ -173,17 +175,20 @@ class Parser(private val tokens: List<Token>) {
                     Variable(name)
                 }
             }
+
             TokenType.SYMBOL -> {
                 when (currentToken().value) {
                     "[" -> parseListExpression()
                     else -> throw IllegalArgumentException("Unexpected symbol: ${currentToken().value}")
                 }
             }
+
             TokenType.STRING -> {
                 val value = currentToken().value
                 advance() // consume string
                 StringLiteral(value)
             }
+
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
         }
     }

@@ -31,12 +31,13 @@ class Interpreter(private val program: Program) {
 
             is IfStatement -> {
                 val condition = evaluateExpression(statement.condition)
-                if (condition != 0) {
+                if (condition == true) {
                     executeBlock(statement.ifBranch)
                 } else if (statement.elseBranch != null) {
                     executeBlock(statement.elseBranch)
                 }
             }
+
 
             is FunctionDefinition -> {
                 functions[statement.name] = { args ->
@@ -74,6 +75,7 @@ class Interpreter(private val program: Program) {
     }
 
     private fun evaluateExpression(expression: Expression): Any {
+        println("Evaluating: $expression")
         return when (expression) {
             is Number -> expression.value
             is Variable -> {
@@ -99,6 +101,8 @@ class Interpreter(private val program: Program) {
                     "-" -> (left as Int) - (right as Int)
                     "*" -> (left as Int) * (right as Int)
                     "/" -> (left as Int) / (right as Int)
+                    ">" -> (left as Int) > (right as Int)
+                    "<" -> (left as Int) < (right as Int)
                     "==" -> left == right
                     "!=" -> left != right
                     else -> throw IllegalArgumentException("Unknown operator: ${expression.operator}")

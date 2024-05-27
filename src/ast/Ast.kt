@@ -4,13 +4,20 @@ sealed class Statement
 
 data class VariableDeclaration(val name: String, val value: Expression) : Statement()
 data class PrintStatement(val expression: Expression) : Statement()
-data class IfStatement(val condition: Expression, val ifBranch: Block, val elseBranch: Block?) : Statement()
+
+data class IfStatement(
+    val condition: Expression,
+    val ifBranch: Block,
+    val elseBranch: Block?
+) : Statement()
+
 data class FunctionDefinition(
     val name: String,
     val parameters: List<String>,
     val body: Block,
     val returnStatement: ReturnStatement?
 ) : Statement()
+
 data class Block(val statements: List<Statement>)
 data class ReturnStatement(val expression: Expression) : Statement()
 

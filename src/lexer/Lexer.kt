@@ -42,20 +42,25 @@ class Lexer(private val input: String) {
                 return Token(TokenType.STRING, stringLiteral) // Return STRING token type
             }
 
+
             // Handle symbols
             val symbol = when (currentChar) {
+
                 '(' -> {
                     position++
                     "("
                 }
+
                 ')' -> {
                     position++
                     ")"
                 }
+
                 '+' -> {
                     position++
                     "+"
                 }
+
                 '-' -> {
                     if (input.getOrNull(position + 1) == '>') {
                         position += 2
@@ -65,50 +70,89 @@ class Lexer(private val input: String) {
                         "-"
                     }
                 }
+
                 '*' -> {
                     position++
                     "*"
                 }
+
                 '/' -> {
                     position++
                     "/"
                 }
+
                 ';' -> {
                     position++
                     ";"
                 }
+
                 '>' -> {
                     position++
                     ">"
                 }
+
+                '<' -> {
+                    position++
+                    ">"
+                }
+
+
+                '=' -> {
+                    if (input.getOrNull(position + 1) == '=') {
+                        position += 2
+                        "=="
+                    } else {
+                        position++
+                        throw IllegalArgumentException("Unexpected character: $currentChar")
+                    }
+                }
+
+                '!' -> {
+                    if (input.getOrNull(position + 1) == '=') {
+                        position += 2
+                        "!="
+                    } else {
+                        position++
+                        throw IllegalArgumentException("Unexpected character: $currentChar")
+                    }
+                }
+
+
                 '{' -> {
                     position++
                     "{"
                 }
+
                 '}' -> {
                     position++
                     "}"
                 }
+
                 '|' -> {
                     position++
                     "|"
                 }
+
                 '\'' -> {
                     position++
                     "\'"
                 }
+
                 '[' -> {
                     position++
                     "["
                 }
+
                 ']' -> {
                     position++
                     "]"
                 }
+
                 '.' -> {
                     position++
                     "."
                 }
+
                 else -> {
                     position++
                     throw IllegalArgumentException("Unexpected character: $currentChar")

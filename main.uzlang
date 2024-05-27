@@ -3,11 +3,11 @@ ozgaruvchi y -> 20;
 ozgaruvchi matn -> "Hello";
 chiqar matn;
 
-f qoshish(a | b) {
+f ayirish(a | b) {
     qaytar a - b;
 }
 
-ozgaruvchi son -> qoshish(x | y);
+ozgaruvchi son -> ayirish(x | y);
 chiqar son;
 
 ozgaruvchi mantiq1 -> t;
@@ -16,3 +16,8 @@ ozgaruvchi mantiq2 -> nt;
 chiqar mantiq1;
 chiqar mantiq2;
 
+agar (x == y) {
+    chiqar mantiq1;
+} yoki {
+    chiqar mantiq2;
+}
