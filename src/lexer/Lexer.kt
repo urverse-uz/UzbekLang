@@ -17,6 +17,18 @@ class Lexer(private val input: String) {
         while (position < input.length) {
             val currentChar = input[position]
 
+            if (currentChar == '#' && input.getOrNull(position + 1) == '#') {
+                // Single-line comment, ignore characters until the end of the line
+                while (position < input.length && input[position] != '\n') {
+                    position++
+                }
+                // Skip newline character if present
+                if (position < input.length && input[position] == '\n') {
+                    position++
+                }
+                continue
+            }
+
             if (currentChar.isWhitespace()) {
                 position++
                 continue

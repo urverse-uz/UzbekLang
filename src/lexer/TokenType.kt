@@ -6,5 +6,6 @@ enum class TokenType {
     NUMBER,
     STRING,
     SYMBOL,
-    EOF
+    EOF,
+    COMMENT
 }

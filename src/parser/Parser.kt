@@ -34,6 +34,9 @@ class Parser(private val tokens: List<Token>) {
             "qaytar" -> parseReturnStatement()
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
         }
+
+
+
     }
 
     private fun parseReturnStatement(): ReturnStatement {
@@ -188,7 +191,6 @@ class Parser(private val tokens: List<Token>) {
                 advance() // consume string
                 StringLiteral(value)
             }
-
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
         }
     }
