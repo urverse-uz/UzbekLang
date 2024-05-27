@@ -21,12 +21,20 @@ class Interpreter(private val program: Program) {
         when (statement) {
             is VariableDeclaration -> {
                 val value = evaluateExpression(statement.value)
-                variables[statement.name] = value
+                variables[statement.name] = value as Int
             }
+
             is PrintStatement -> {
                 val value = evaluateExpression(statement.expression)
-                println(value)
+                if (statement.expression is StringLiteral) {
+                    // If it's a string literal, print it without appending 0
+                    println(value)
+                } else {
+                    // For other expressions, print the value
+                    println(value)
+                }
             }
+
             is IfStatement -> {
                 val condition = evaluateExpression(statement.condition)
                 if (condition != 0) {
@@ -35,6 +43,7 @@ class Interpreter(private val program: Program) {
                     executeBlock(statement.elseBranch)
                 }
             }
+
             is FunctionDefinition -> {
                 functions[statement.name] = { args ->
                     // Create a new scope for function execution
@@ -53,9 +62,11 @@ class Interpreter(private val program: Program) {
                     result
                 }
             }
+
             is ReturnStatement -> {
-                returnValue = evaluateExpression(statement.expression)
+                returnValue = evaluateExpression(statement.expression) as Int
             }
+
             else -> throw IllegalArgumentException("Unknown statement type: $statement")
         }
     }
@@ -69,33 +80,41 @@ class Interpreter(private val program: Program) {
         }
     }
 
-    private fun evaluateExpression(expression: Expression): Int {
+    private fun evaluateExpression(expression: Expression): Any {
+//        println("Evaluating expression: $expression")
         return when (expression) {
             is Number -> expression.value
-            is Variable -> variables[expression.name] ?: throw IllegalArgumentException("Unknown variable: ${expression.name}")
+            is Variable -> variables[expression.name]
+                ?: throw IllegalArgumentException("Unknown variable: ${expression.name}")
+
             is BinaryOperation -> {
                 val left = evaluateExpression(expression.left)
                 val right = evaluateExpression(expression.right)
                 when (expression.operator) {
-                    "+" -> left + right
-                    "-" -> left - right
-                    "*" -> left * right
-                    "/" -> left / right
+                    "+" -> left as Int + right as Int
+                    "-" -> left as Int - right as Int
+                    "*" -> left as Int * right as Int
+                    "/" -> left as Int / right as Int
                     else -> throw IllegalArgumentException("Unknown operator: ${expression.operator}")
                 }
             }
+
             is FunctionCall -> {
-                val function = functions[expression.functionName] ?: throw IllegalArgumentException("Unknown function: ${expression.functionName}")
-                val arguments = expression.arguments.map { evaluateExpression(it) }
+                val function = functions[expression.functionName]
+                    ?: throw IllegalArgumentException("Unknown function: ${expression.functionName}")
+                val arguments = expression.arguments.map { evaluateExpression(it) as Int }
                 function(arguments)
             }
+
             is ListExpression -> {
                 expression.elements.size
             }
+
             is StringLiteral -> {
-                println(expression.value)
-                0
+                expression.value
             }
+
+
             else -> throw IllegalArgumentException("Unknown expression type: $expression")
         }
     }
