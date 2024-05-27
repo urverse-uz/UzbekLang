@@ -1,6 +1,6 @@
+// parser/Parser.kt
 package parser
 
-import ast.Variable
 import ast.*
 import lexer.Token
 import lexer.TokenType
@@ -16,18 +16,6 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
-    private fun consume(type: TokenType, value: String? = null, endOfInputAllowed: Boolean = false): Token {
-        val token = currentToken()
-        if (token.type == type && (value == null || token.value == value)) {
-            advance()
-            return token
-        } else if (endOfInputAllowed && token.type == TokenType.EOF) {
-            return token
-        }
-        throw IllegalArgumentException("Expected $type with value $value but got ${token.type} with value ${token.value}")
-    }
-
-
     fun parse(): Program {
         val statements = mutableListOf<Statement>()
         while (currentToken().type != TokenType.EOF) {
@@ -40,73 +28,176 @@ class Parser(private val tokens: List<Token>) {
         return when (currentToken().value) {
             "ozgaruvchi" -> parseVariableDeclaration()
             "chiqar" -> parsePrintStatement()
+            "agar" -> parseIfStatement()
+            "f" -> parseFunctionDefinition()
+            "qaytar" -> parseReturnStatement()
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
         }
     }
 
-    private fun parseVariableDeclaration(): Statement {
-        consume(TokenType.KEYWORD, "ozgaruvchi")
-        val name = consume(TokenType.IDENTIFIER).value
-        consume(TokenType.SYMBOL, "->")
+    private fun parseReturnStatement(): ReturnStatement {
+        advance() // consume "qaytar"
+        val expression = parseExpression()
+        if (currentToken().value != ";") {
+            throw IllegalArgumentException("Expected ';' after return statement")
+        }
+        advance() // consume ";"
+        return ReturnStatement(expression)
+    }
+
+    private fun parseVariableDeclaration(): VariableDeclaration {
+        advance() // consume "ozgaruvchi"
+        val name = currentToken().value
+        advance() // consume variable name
+        if (currentToken().value != "->") {
+            throw IllegalArgumentException("Expected '->' after variable name")
+        }
+        advance() // consume "->"
         val value = parseExpression()
-        consume(TokenType.SYMBOL, ";", true) // Allow for end of input as well
+        if (currentToken().value != ";") {
+            throw IllegalArgumentException("Expected ';' after variable declaration")
+        }
+        advance() // consume ";"
         return VariableDeclaration(name, value)
     }
 
-    private fun parsePrintStatement(): Statement {
-        consume(TokenType.KEYWORD, "chiqar")
+    private fun parsePrintStatement(): PrintStatement {
+        advance() // consume "chiqar"
         val expression = parseExpression()
-        consume(TokenType.SYMBOL, ";", true) // Allow for end of input as well
+        if (currentToken().value != ";") {
+            throw IllegalArgumentException("Expected ';' after print statement")
+        }
+        advance() // consume ";"
         return PrintStatement(expression)
     }
 
+    private fun parseIfStatement(): IfStatement {
+        advance() // consume "agar"
+        if (currentToken().value != "(") {
+            throw IllegalArgumentException("Expected '(' after 'agar'")
+        }
+        advance() // consume "("
+        val condition = parseExpression()
+        if (currentToken().value != ")") {
+            throw IllegalArgumentException("Expected ')' after condition")
+        }
+        advance() // consume ")"
+        if (currentToken().value != "{") {
+            throw IllegalArgumentException("Expected '{' after ')'")
+        }
+        val ifBranch = parseBlock()
+        var elseBranch: Block? = null
+        if (currentToken().value == "yoki") {
+            advance() // consume "yoki"
+            elseBranch = parseBlock()
+        }
+        return IfStatement(condition, ifBranch, elseBranch)
+    }
+
+    private fun parseBlock(): Block {
+        val statements = mutableListOf<Statement>()
+        if (currentToken().value != "{") {
+            throw IllegalArgumentException("Expected '{' to start block")
+        }
+        advance() // consume "{"
+        while (currentToken().value != "}") {
+            statements.add(parseStatement())
+        }
+        advance() // consume "}"
+        return Block(statements)
+    }
+
+    private fun parseFunctionDefinition(): FunctionDefinition {
+        advance() // consume "f"
+        val name = currentToken().value
+        advance() // consume function name
+        if (currentToken().value != "(") {
+            throw IllegalArgumentException("Expected '(' after function name")
+        }
+        advance() // consume "("
+        val parameters = mutableListOf<String>()
+        while (currentToken().value != ")") {
+            parameters.add(currentToken().value)
+            advance() // consume parameter
+            if (currentToken().value == "|") {
+                advance() // consume "|"
+            }
+        }
+        advance() // consume ")"
+        val body = parseBlock()
+        var returnStatement: ReturnStatement? = null
+        if (currentToken().value == "qaytar") {
+            returnStatement = parseReturnStatement()
+        }
+        return FunctionDefinition(name, parameters, body, returnStatement)
+    }
 
 
     private fun parseExpression(): Expression {
-        var result = parseTerm()
-        while (currentToken().value in listOf("+", "-")) {
-            val operator = currentToken().value
-            advance()
-            val right = parseTerm()
-            result = BinaryOperation(result, operator, right)
-        }
-        return result
+        return parseBinaryOperation()
     }
 
-    private fun parseTerm(): Expression {
-        var result = parseFactor()
-        while (currentToken().value in listOf("*", "/")) {
+    private fun parseBinaryOperation(): Expression {
+        var left = parsePrimary()
+        while (currentToken().value in listOf("+", "-", "*", "/", ">", "<", "==")) {
             val operator = currentToken().value
-            advance()
-            val right = parseFactor()
-            result = BinaryOperation(result, operator, right)
+            advance() // consume operator
+            val right = parsePrimary()
+            left = BinaryOperation(left, operator, right)
         }
-        return result
+        return left
     }
 
-    private fun parseFactor(): Expression {
+    private fun parsePrimary(): Expression {
         return when (currentToken().type) {
             TokenType.NUMBER -> {
                 val value = currentToken().value.toInt()
-                advance()
+                advance() // consume number
                 Number(value)
             }
             TokenType.IDENTIFIER -> {
                 val name = currentToken().value
-                advance()
-                Variable(name)
+                advance() // consume identifier
+                if (currentToken().value == "(") {
+                    advance() // consume "("
+                    val arguments = mutableListOf<Expression>()
+                    while (currentToken().value != ")") {
+                        arguments.add(parseExpression())
+                        if (currentToken().value == "|") {
+                            advance() // consume "|"
+                        }
+                    }
+                    advance() // consume ")"
+                    FunctionCall(name, arguments)
+                } else {
+                    Variable(name)
+                }
             }
             TokenType.SYMBOL -> {
-                if (currentToken().value == "(") {
-                    advance()
-                    val expression = parseExpression()
-                    consume(TokenType.SYMBOL, ")")
-                    expression
-                } else {
-                    throw IllegalArgumentException("Unexpected symbol: ${currentToken().value}")
+                when (currentToken().value) {
+                    "[" -> parseListExpression()
+                    else -> throw IllegalArgumentException("Unexpected symbol: ${currentToken().value}")
                 }
+            }
+            TokenType.STRING -> {
+                val value = currentToken().value
+                advance() // consume string
+                StringLiteral(value)
             }
             else -> throw IllegalArgumentException("Unexpected token: ${currentToken().value}")
         }
+    }
+
+    private fun parseListExpression(): ListExpression {
+        val elements = mutableListOf<Expression>()
+        advance() // consume "["
+        while (currentToken().value != "]") {
+            elements.add(parseExpression())
+            if (currentToken().value == "|") {
+                advance() // consume "|"
+            }
+        }
+        advance() // consume "]"
+        return ListExpression(elements)
     }
 }

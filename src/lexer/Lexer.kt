@@ -5,100 +5,148 @@ class Lexer(private val input: String) {
 
     private val keywords = mapOf(
         "ozgaruvchi" to TokenType.KEYWORD,
-        "chiqar" to TokenType.KEYWORD
+        "chiqar" to TokenType.KEYWORD,
+        "agar" to TokenType.KEYWORD,
+        "yoki" to TokenType.KEYWORD,
+        "f" to TokenType.KEYWORD,
+        "qaytar" to TokenType.KEYWORD,
+        "Royxat" to TokenType.KEYWORD
     )
 
-    private fun currentChar(): Char? = input.getOrNull(position)
-
-    private fun advance() {
-        position++
-    }
-
-    private fun skipWhitespace() {
-        while (currentChar()?.isWhitespace() == true) {
-            advance()
-        }
-    }
-
-    private fun identifier(): Token {
-        val start = position
-        while (currentChar()?.isLetterOrDigit() == true) {
-            advance()
-        }
-        val value = input.substring(start, position)
-        val type = keywords.getOrDefault(value, TokenType.IDENTIFIER)
-        return Token(type, value)
-    }
-
-    private fun number(): Token {
-        val start = position
-        while (currentChar()?.isDigit() == true) {
-            advance()
-        }
-        val value = input.substring(start, position)
-        return Token(TokenType.NUMBER, value)
-    }
-
-    private fun symbol(): Token {
-        val current = currentChar() ?: throw IllegalArgumentException("Unexpected end of input")
-        val next = input.getOrNull(position + 1)
-
-        return when {
-            current == '-' && next == '>' -> {
-                advance()
-                advance()
-                Token(TokenType.SYMBOL, "->")
-            }
-            current == '+' -> {
-                advance()
-                Token(TokenType.SYMBOL, "+")
-            }
-            current == '-' -> {
-                advance()
-                Token(TokenType.SYMBOL, "-")
-            }
-            current == '*' -> {
-                advance()
-                Token(TokenType.SYMBOL, "*")
-            }
-            current == '/' -> {
-                advance()
-                Token(TokenType.SYMBOL, "/")
-            }
-            current == '(' -> {
-                advance()
-                Token(TokenType.SYMBOL, "(")
-            }
-            current == ')' -> {
-                advance()
-                Token(TokenType.SYMBOL, ")")
-            }
-            current == ';' -> {
-                advance()
-                Token(TokenType.SYMBOL, ";")
-            }
-            else -> throw IllegalArgumentException("Unexpected character: $current")
-        }
-    }
-
     fun getNextToken(): Token {
-        skipWhitespace()
+        while (position < input.length) {
+            val currentChar = input[position]
 
-        val current = currentChar() ?: return Token(TokenType.EOF, "")
-
-        return when {
-            current == '/' && input.getOrNull(position + 1) == '/' -> {
-                while (currentChar() != '\n' && currentChar() != null) {
-                    advance()
-                }
-                getNextToken()
+            if (currentChar.isWhitespace()) {
+                position++
+                continue
             }
-            current.isLetter() -> identifier()
-            current.isDigit() -> number()
-            current == ':' -> symbol()
-            current == '(' || current == ')' || current == '+' || current == '-' || current == '*' || current == ';' -> symbol()
-            else -> throw IllegalArgumentException("Unexpected character: $current")
+
+            if (currentChar.isDigit()) {
+                val number = extractNumber()
+                return Token(TokenType.NUMBER, number)
+            }
+
+            if (currentChar.isLetter()) {
+                val identifier = extractIdentifier()
+                val keywordType = keywords[identifier]
+                return if (keywordType != null) {
+                    Token(keywordType, identifier)
+                } else {
+                    Token(TokenType.IDENTIFIER, identifier)
+                }
+            }
+
+            if (currentChar == '"') {
+                val stringLiteral = extractStringLiteral()
+                return Token(TokenType.STRING, stringLiteral)
+            }
+
+            // Handle symbols
+            val symbol = when (currentChar) {
+                '(' -> {
+                    position++
+                    "("
+                }
+                ')' -> {
+                    position++
+                    ")"
+                }
+                '+' -> {
+                    position++
+                    "+"
+                }
+                '-' -> {
+                    if (input.getOrNull(position + 1) == '>') {
+                        position += 2
+                        "->"
+                    } else {
+                        position++
+                        "-"
+                    }
+                }
+                '*' -> {
+                    position++
+                    "*"
+                }
+                '/' -> {
+                    position++
+                    "/"
+                }
+                ';' -> {
+                    position++
+                    ";"
+                }
+                '>' -> {
+                    position++
+                    ">"
+                }
+                '{' -> {
+                    position++
+                    "{"
+                }
+                '}' -> {
+                    position++
+                    "}"
+                }
+                '|' -> {
+                    position++
+                    "|"
+                }
+                '\'' -> {
+                    position++
+                    "\'"
+                }
+                '[' -> {
+                    position++
+                    "["
+                }
+                ']' -> {
+                    position++
+                    "]"
+                }
+                '.' -> {
+                    position++
+                    "."
+                }
+                else -> {
+                    position++
+                    throw IllegalArgumentException("Unexpected character: $currentChar")
+                }
+            }
+            return Token(TokenType.SYMBOL, symbol)
         }
+
+        return Token(TokenType.EOF, "")
     }
 
+    private fun extractStringLiteral(): String {
+        val start = position + 1 // Skip the opening quotation mark
+        var end = start
+        while (end < input.length && input[end] != '"') {
+            end++
+        }
+        if (end >= input.length) {
+            throw IllegalArgumentException("Unterminated string literal")
+        }
+        val stringLiteral = input.substring(start, end)
+        position = end + 1 // Move past the closing quotation mark
+        return stringLiteral
+    }
+
+    private fun extractNumber(): String {
+        val start = position
+        while (position < input.length && input[position].isDigit()) {
+            position++
+        }
+        return input.substring(start, position)
+    }
+
+    private fun extractIdentifier(): String {
+        val start = position
+        while (position < input.length && (input[position].isLetterOrDigit() || input[position] == '_')) {
+            position++
+        }
+        return input.substring(start, position)
+    }
 }
