@@ -4,7 +4,7 @@ import ast.*
 import ast.Number
 
 class Interpreter(private val program: Program) {
-    private val variables = mutableMapOf<String, Int>()
+    private val variables = mutableMapOf<String, Any>()
     private val functions = mutableMapOf<String, (List<Int>) -> Int>()
     private var returnValue: Int? = null
 
@@ -21,8 +21,13 @@ class Interpreter(private val program: Program) {
         when (statement) {
             is VariableDeclaration -> {
                 val value = evaluateExpression(statement.value)
-                variables[statement.name] = value as Int
+                when (value) {
+                    is Int -> variables[statement.name] = value
+                    is String -> variables[statement.name] = value
+                    else -> throw IllegalArgumentException("Unsupported variable type: $value")
+                }
             }
+
 
             is PrintStatement -> {
                 val value = evaluateExpression(statement.expression)
@@ -81,7 +86,6 @@ class Interpreter(private val program: Program) {
     }
 
     private fun evaluateExpression(expression: Expression): Any {
-//        println("Evaluating expression: $expression")
         return when (expression) {
             is Number -> expression.value
             is Variable -> variables[expression.name]
@@ -91,10 +95,10 @@ class Interpreter(private val program: Program) {
                 val left = evaluateExpression(expression.left)
                 val right = evaluateExpression(expression.right)
                 when (expression.operator) {
-                    "+" -> left as Int + right as Int
-                    "-" -> left as Int - right as Int
-                    "*" -> left as Int * right as Int
-                    "/" -> left as Int / right as Int
+                    "+" -> (left as Int) + (right as Int)
+                    "-" -> (left as Int) - (right as Int)
+                    "*" -> (left as Int) * (right as Int)
+                    "/" -> (left as Int) / (right as Int)
                     else -> throw IllegalArgumentException("Unknown operator: ${expression.operator}")
                 }
             }
@@ -106,16 +110,14 @@ class Interpreter(private val program: Program) {
                 function(arguments)
             }
 
-            is ListExpression -> {
-                expression.elements.size
-            }
+            is ListExpression -> expression.elements.size
 
-            is StringLiteral -> {
-                expression.value
-            }
-
+            is StringLiteral -> expression.value // Return the string value as-is
 
             else -> throw IllegalArgumentException("Unknown expression type: $expression")
         }
     }
+
+
+
 }

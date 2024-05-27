@@ -39,7 +39,7 @@ class Lexer(private val input: String) {
 
             if (currentChar == '"') {
                 val stringLiteral = extractStringLiteral()
-                return Token(TokenType.STRING, stringLiteral)
+                return Token(TokenType.STRING, stringLiteral) // Return STRING token type
             }
 
             // Handle symbols

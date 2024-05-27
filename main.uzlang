@@ -1,10 +1,10 @@
 ozgaruvchi x -> 10;
 ozgaruvchi y -> 20;
-
-chiqar "Hello, UzLang!";
+ozgaruvchi matn -> "Hello";
+chiqar matn;
 
 f qoshish(a | b) {
-    qaytar a + b;
+    qaytar a - b;
 }
 
 ozgaruvchi son -> qoshish(x | y);
