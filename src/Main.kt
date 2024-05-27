@@ -5,11 +5,32 @@ import lexer.TokenType
 import parser.Parser
 import java.io.File
 
-fun main() {
-    val currentDir = System.getProperty("user.dir")
-    val fileName = "$currentDir/main.uzlang"
+fun main(args: Array<String>) {
+    if (args.isEmpty()) {
+        println("Usage: java -jar UzbekLang.jar <filename.uzlang>")
+        return
+    }
 
-    val sourceCode = File(fileName).readText()
+    var fileName = args[0]
+
+    if (fileName.endsWith(".txt")) {
+        fileName = fileName.removeSuffix(".txt")
+    }
+
+    val uzlangFile = File("$fileName.uzlang")
+    val sourceCode = if (uzlangFile.exists()) {
+        uzlangFile.readText()
+    } else {
+        val txtFile = File("$fileName.txt")
+        if (txtFile.exists()) {
+            txtFile.readText()
+        } else {
+            println("File not found: $fileName.uzlang")
+            return
+        }
+    }
+
+//    println("Source code: $sourceCode")
 
     val lexer = Lexer(sourceCode)
     val tokens = mutableListOf<Token>()
